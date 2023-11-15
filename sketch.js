@@ -1,64 +1,65 @@
-// a simple game where you click to drop a ball and 
-// try to get as many balls as possible on the spinning shape
-// move the mouse up and down to change the rotation speed of the shape
-// use the right and left keys to make the shape larger or smaller
+let kanye;
+let kanyeImage;
+let bullets;
+let bulletImage;
+let bulletFired = false;
+let lastBulletFrame = 0; // Variable to store the frame count of the last bullet fired
+let bulletDelay = 30;
 
-let spinningShape;
-let highScore = 0;
+
+function preload() {
+  kanyeImage = loadImage('assets/kanye.png');
+  bulletImage = loadImage('assets/tomato.png');
+}
 
 function setup() {
-    let canvas = new Canvas("fullscreen");
+  createCanvas(700,700);
 
-    world.gravity.y = 10;
+  let title = createElement('h2', "TAYLOR VS KANYE");
+  title.position(200,40);
+  title.style('color', '#ff0000');
 
-    // this sprite can be created on a single line, but it's easier to read this way:
-	spinningShape = new Sprite();
-	spinningShape.width = canvas.width/5;
-	spinningShape.height = spinningShape.width;
-    spinningShape.collider = "kinematic";
+  kanye = createSprite(width / 2, height - 50, 50, 50);
+  kanye.addImage(kanyeImage);
+  kanye.scale = 0.2; 
+  kanye.maxSpeed = 5;
 
-    textFont("Courier", 24);
+  // Create a group for bullets
+  bullets = new Group();
+
 }
 
 function draw() {
+  background(0);
 
-    // try the game without this line :)
-    clear();
+  // Player controls
+  if (keyIsDown(LEFT_ARROW) && kanye.position.x > 25) {
+    kanye.position.x -= 5;
+  }
+  if (keyIsDown(RIGHT_ARROW) && kanye.position.x < width - 25) {
+    kanye.position.x += 5;
+  }
 
-    // the map function translates a value from one range to another
-    // https://p5js.org/reference/#/p5/map
-    spinningShape.rotationSpeed = map(mouse.y, 0, canvas.height, -10, 10);
+  if (keyIsDown(32) && frameCount - lastBulletFrame > bulletDelay) {
+    shootBullet();
+    lastBulletFrame = frameCount; // Update the frame count of the last bullet fired
+  }
 
-    // create a ball when the mouse is clicked
-    // https://p5play.org/learn/input_devices.html
-    if (mouse.presses()) {
-        let ball = new Sprite(mouse.x, -20, 20);
-        // make the ball resist rolling when it touches the spinning shape
-        // https://p5play.org/learn/sprite.html?page=9
-        ball.rotationDrag = 10;
+  // Move bullets
+  bullets.forEach(bullet => {
+    bullet.position.y -= 5;
+    if (bullet.position.y < 0) {
+      bullet.remove();
     }
+  });
 
-    // make the spinning shape larger or smaller using the keyboard
-    // note the difference between presses (above) and pressing (here)
-    if (kb.pressing('right')) {
-        spinningShape.width += 10;
-    } else if (kb.pressing('left')) {
-        spinningShape.width -= 10;
-    }
 
-    // loop through the allSprites array and see how many are above the center of the screen
-    let currentScore = 0;
-    for (let sprite of allSprites) {
-        if (sprite.y < canvas.height/2) {
-            currentScore++;
-            if (currentScore > highScore) {
-                highScore = currentScore;
-            }
-        }
-    }
+}
 
-    // display the score (minus 1 so it doesn't count the spinning shape)
-    text("BALLS: " + (currentScore-1), 40, 60);
-    text("HIGH:  " + (highScore-1), 40, 86);
 
+function shootBullet() {
+  let bullet = createSprite(kanye.position.x, kanye.position.y - 20, 5, 15);
+  bullet.addImage(bulletImage); // Set the loaded image for the bullet sprite
+  bullet.scale = 0.07; // Adjust the scale if needed
+  bullets.add(bullet);
 }
