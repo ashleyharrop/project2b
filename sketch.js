@@ -5,11 +5,18 @@ let bulletImage;
 let bulletFired = false;
 let lastBulletFrame = 0; // Variable to store the frame count of the last bullet fired
 let bulletDelay = 30;
+let fallingSprites;
+let fallingSpriteImages = [];
 
 
 function preload() {
   kanyeImage = loadImage('assets/kanye.png');
   bulletImage = loadImage('assets/tomato.png');
+
+  for (let i = 1; i <= 5; i++) {
+    fallingSpriteImages.push(loadImage(`assets/taylor${i}.png`));
+  }
+
 }
 
 function setup() {
@@ -24,8 +31,10 @@ function setup() {
   kanye.scale = 0.2; 
   kanye.maxSpeed = 5;
 
-  // Create a group for bullets
+ 
   bullets = new Group();
+
+  fallingSprites = new Group();
 
 }
 
@@ -53,6 +62,17 @@ function draw() {
     }
   });
 
+  if (frameCount % 60 === 0) { // Spawn every 60 frames (adjust as needed)
+    spawnFallingSprite();
+  }
+
+  // Move falling sprites
+  fallingSprites.forEach(fallingSprite => {
+    fallingSprite.position.y += 3; // Adjust the speed of falling sprites
+    if (fallingSprite.position.y > height) {
+      fallingSprite.remove();
+    }
+  });
 
 }
 
@@ -62,4 +82,12 @@ function shootBullet() {
   bullet.addImage(bulletImage); // Set the loaded image for the bullet sprite
   bullet.scale = 0.07; // Adjust the scale if needed
   bullets.add(bullet);
+}
+
+function spawnFallingSprite() {
+  let randomIndex = floor(random(fallingSpriteImages.length));
+  let fallingSprite = createSprite(random(width), 0, 30, 30);
+  fallingSprite.addImage(fallingSpriteImages[randomIndex]);
+  fallingSprite.scale = 0.1;
+  fallingSprites.add(fallingSprite);
 }
