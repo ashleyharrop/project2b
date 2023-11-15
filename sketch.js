@@ -3,10 +3,12 @@ let kanyeImage;
 let bullets;
 let bulletImage;
 let bulletFired = false;
-let lastBulletFrame = 0; // Variable to store the frame count of the last bullet fired
+let lastBulletFrame = 0; 
 let bulletDelay = 30;
 let fallingSprites;
 let fallingSpriteImages = [];
+let score = 0;
+let lives = 3;
 
 
 function preload() {
@@ -41,7 +43,7 @@ function setup() {
 function draw() {
   background(0);
 
-  // Player controls
+
   if (keyIsDown(LEFT_ARROW) && kanye.position.x > 25) {
     kanye.position.x -= 5;
   }
@@ -51,10 +53,10 @@ function draw() {
 
   if (keyIsDown(32) && frameCount - lastBulletFrame > bulletDelay) {
     shootBullet();
-    lastBulletFrame = frameCount; // Update the frame count of the last bullet fired
+    lastBulletFrame = frameCount; 
   }
 
-  // Move bullets
+ 
   bullets.forEach(bullet => {
     bullet.position.y -= 5;
     if (bullet.position.y < 0) {
@@ -62,38 +64,63 @@ function draw() {
     }
   });
 
-  if (frameCount % 60 === 0) { // Spawn every 60 frames (adjust as needed)
+  if (frameCount % 60 === 0) { 
     spawnFallingSprite();
   }
 
-  // Move falling sprites
   fallingSprites.forEach(fallingSprite => {
-    fallingSprite.position.y += 3; // Adjust the speed of falling sprites
+    if (
+      kanye.position.x > fallingSprite.position.x - 15 &&
+      kanye.position.x < fallingSprite.position.x + 15 &&
+      kanye.position.y > fallingSprite.position.y - 15 &&
+      kanye.position.y < fallingSprite.position.y + 15
+    ) {
+      fallingSprite.remove();
+      lives--;
+    }
+  });
+
+
+  fallingSprites.forEach(fallingSprite => {
+    fallingSprite.position.y += 3; 
     if (fallingSprite.position.y > height) {
       fallingSprite.remove();
+      
     }
 
-// Check for collisions with bullets
-bullets.forEach(bullet => {
-  if (bullet.position.x > fallingSprite.position.x - 15 &&
-      bullet.position.x < fallingSprite.position.x + 15 &&
-      bullet.position.y > fallingSprite.position.y - 15 &&
-      bullet.position.y < fallingSprite.position.y + 15) {
-    // Remove both the bullet and the falling sprite when a collision occurs
-    bullet.remove();
-    fallingSprite.remove();
-  }
-});
+  
+  bullets.forEach(bullet => {
+    if (bullet.position.x > fallingSprite.position.x - 15 &&
+        bullet.position.x < fallingSprite.position.x + 15 &&
+        bullet.position.y > fallingSprite.position.y - 15 &&
+        bullet.position.y < fallingSprite.position.y + 15) {
+      
+      bullet.remove();
+      fallingSprite.remove();
+      score++;
+        }
+  });
 
 });
+
+fill(255);
+textSize(20);
+text(`Score: ${score}`, width - 150, 30);
+text(`Lives: ${lives}`, width - 150, 60);
+
+if (lives <= 0) {
+  gameOver();
+  noLoop();
+}
+
 
 }
 
 
 function shootBullet() {
   let bullet = createSprite(kanye.position.x, kanye.position.y - 20, 5, 15);
-  bullet.addImage(bulletImage); // Set the loaded image for the bullet sprite
-  bullet.scale = 0.07; // Adjust the scale if needed
+  bullet.addImage(bulletImage); 
+  bullet.scale = 0.07; 
   bullets.add(bullet);
 }
 
@@ -103,4 +130,16 @@ function spawnFallingSprite() {
   fallingSprite.addImage(fallingSpriteImages[randomIndex]);
   fallingSprite.scale = 0.1;
   fallingSprites.add(fallingSprite);
+
+
+}
+
+function gameOver() {
+  background(0);
+  fill(255);
+  textSize(32);
+  textAlign(CENTER, CENTER);
+  text("Game Over", width / 2, height / 2);
+  textSize(20);
+  text(`Your score: ${score}`, width / 2, height / 2 + 40);
 }
