@@ -72,7 +72,20 @@ function draw() {
     if (fallingSprite.position.y > height) {
       fallingSprite.remove();
     }
-  });
+
+// Check for collisions with bullets
+bullets.forEach(bullet => {
+  if (bullet.position.x > fallingSprite.position.x - 15 &&
+      bullet.position.x < fallingSprite.position.x + 15 &&
+      bullet.position.y > fallingSprite.position.y - 15 &&
+      bullet.position.y < fallingSprite.position.y + 15) {
+    // Remove both the bullet and the falling sprite when a collision occurs
+    bullet.remove();
+    fallingSprite.remove();
+  }
+});
+
+});
 
 }
 
